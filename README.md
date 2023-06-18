@@ -8,6 +8,7 @@ Godot GDextension allowing to have speech to text in your game using vosk
 @onready var vosk := $Vosk
 
 ...
+var effect : AudioEffectCapture  # See AudioEffect in docs
 
 func _ready() -> void
      # vosk-model-small-fr-0.22 is an audio model you can download
@@ -19,7 +20,11 @@ func _ready() -> void
 	   vosk.init("bin/vosk-model-small-fr-0.22", '["foo", "bar"]')
 
 func _process(delta: float) -> void:
-    # TODO explain more how to get audio
+	if  !effect.can_get_buffer(buffer_length_frames / 2):
+		return
+
+	var data = effect.get_buffer(effect.get_frames_available())
+
     #
     # basically accept_wave_form is the method to feed it with new audio data
     # (it works with stream and is able to detect change from silence to 'speaking'
@@ -28,7 +33,7 @@ func _process(delta: float) -> void:
     # not feed it everytime the whole data.
     #
     # it returns true when it's again silence and it has a final result
-    if vosk.accept_wave_form(recording.data):
+	if accept_wave_form_stereo_float(data):
         print(vosk.result())
     else:
         # if it's not yet finalized, you still can get the partial result
@@ -46,6 +51,20 @@ to do so we had to add in SConstruct the two lines
 env.Append(LIBPATH=["bin/"])
 env.Append(LIBS=["libvosk"])
 ```
+
+for exporting things correctly you also need the `[dependencies]` section in your `.gdextension` file
+
+```
+[dependencies]
+
+linux.debug.x86_64 = {
+    "res://bin/libvosk.so" : ""
+}
+linux.release.x86_64 = {
+    "res://bin/libvosk.so" : ""
+}
+```
+
 
 ## About Vosk
 

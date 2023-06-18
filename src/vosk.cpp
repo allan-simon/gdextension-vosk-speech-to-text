@@ -1,13 +1,14 @@
 #include "vosk.h"
 #include "vosk_api.h"
 #include <godot_cpp/core/class_db.hpp>
-#include <fstream>
+#include <algorithm>
 
 using namespace godot;
 
 void Vosk::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("init", "modelPath", "wordsList"), &Vosk::init);
 	ClassDB::bind_method(D_METHOD("accept_wave_form", "data"), &Vosk::accept_wave_form);
+	ClassDB::bind_method(D_METHOD("accept_wave_form_stereo_float", "data"), &Vosk::accept_wave_form_stereo_float);
 	ClassDB::bind_method(D_METHOD("partial_result"), &Vosk::partial_result);
 	ClassDB::bind_method(D_METHOD("result"), &Vosk::result);
 }
@@ -50,6 +51,23 @@ bool Vosk::accept_wave_form(PackedByteArray data)
         data.size()/2
         //reinterpret_cast<const char*> (data.ptr()),
         //data.size()
+    );
+}
+
+bool Vosk::accept_wave_form_stereo_float(PackedVector2Array data)
+{
+
+    std::vector<short> mono;
+    mono.resize(data.size());
+
+    for (int i = 0; i < data.size(); i ++) {
+        mono[i] = std::clamp( (short) (data[i].x * 32768), (short) -32768, (short) 32767);
+    }
+
+    return vosk_recognizer_accept_waveform_s(
+        recognizer,
+        mono.data(),
+        data.size()
     );
 }
 
