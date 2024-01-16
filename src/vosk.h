@@ -25,7 +25,8 @@ public:
     Vosk();
     ~Vosk();
 
-    void init(String modelPath, String wordsList);
+    void init(String modelPath);
+    void init_wordlist(String modelPath, String wordsList);
     bool accept_wave_form(PackedByteArray data);
     bool accept_wave_form_stereo_float(PackedVector2Array data);
     String partial_result();
