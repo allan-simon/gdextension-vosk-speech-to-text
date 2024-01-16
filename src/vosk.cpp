@@ -6,7 +6,8 @@
 using namespace godot;
 
 void Vosk::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("init", "modelPath", "wordsList"), &Vosk::init);
+	ClassDB::bind_method(D_METHOD("init", "modelPath"), &Vosk::init);
+    ClassDB::bind_method(D_METHOD("init_wordlist", "modelPath", "wordsList"), &Vosk::init_wordlist);
 	ClassDB::bind_method(D_METHOD("accept_wave_form", "data"), &Vosk::accept_wave_form);
 	ClassDB::bind_method(D_METHOD("accept_wave_form_stereo_float", "data"), &Vosk::accept_wave_form_stereo_float);
 	ClassDB::bind_method(D_METHOD("partial_result"), &Vosk::partial_result);
@@ -28,7 +29,14 @@ Vosk::~Vosk() {
     // Add your cleanup here.
 }
 
-void Vosk::init(String modelPath, String wordsList)
+void Vosk::init(String modelPath)
+{
+    vosk_set_log_level(2);
+    model = vosk_model_new(modelPath.utf8().get_data());
+    recognizer = vosk_recognizer_new(model, 44100);
+}
+
+void Vosk::init_wordlist(String modelPath, String wordsList)
 {
     vosk_set_log_level(2);
     model = vosk_model_new(modelPath.utf8().get_data());
